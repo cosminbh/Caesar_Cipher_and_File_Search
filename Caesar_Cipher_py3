@@ -1,0 +1,146 @@
+import os
+import subprocess
+import threading
+import tkinter as tk
+
+matching_files = [];
+pathforfile:str;
+
+def caesar_cipher():
+    message = entryText.get()
+    encrypted_messages = []
+    all_strings = ""
+    for i in range(1, 26):
+        shifted_message = ""
+        for char in message:
+            if char.isalpha():
+                ascii_offset = 65 if char.isupper() else 97
+                shifted_char = chr((ord(char) - ascii_offset + i) % 26 + ascii_offset)
+                shifted_message += shifted_char
+            else:
+                shifted_message += char
+        encrypted_messages.append(shifted_message)
+
+    for i, permutation in enumerate(encrypted_messages):
+        all_strings += permutation;
+        all_strings += "\n"
+    
+    info.config(text = all_strings);
+
+    return all_strings
+
+
+
+def caesar_cipher3(message):
+    encrypted_messages = []
+    all_strings = ""
+    for i in range(1, 26):
+        shifted_message = ""
+        for char in message:
+            if char.isalpha():
+                ascii_offset = 65 if char.isupper() else 97
+                shifted_char = chr((ord(char) - ascii_offset + i) % 26 + ascii_offset)
+                shifted_message += shifted_char
+            else:
+                shifted_message += char
+        encrypted_messages.append(shifted_message)
+
+    for i, permutation in enumerate(encrypted_messages):
+        all_strings += permutation;
+        all_strings += "\n"
+    
+    info.config(text = all_strings);
+
+    return all_strings
+
+
+def search_file(filename, search_path):
+    global matching_files;
+    print(filename)
+    for root, dirs, files in os.walk(search_path):
+        if filename in files:
+            file_path = os.path.join(root, filename);
+            matching_files.append(file_path);
+
+
+def searchForFiles():
+    file_to_search = entryText3.get();
+    search_directory = "\\"; #Pentru Linux... Pentru Windows avem \\
+    num_threads = 4;
+    threads = [];
+
+
+    segment_size = int(len(search_directory) / num_threads);
+    for i in range(num_threads):
+        start_index = i * segment_size;
+        end_index = start_index + segment_size if i < num_threads - 1 else None;
+        segment_path = search_directory[start_index:end_index];
+
+
+        thread = threading.Thread(target=search_file, args=(file_to_search, segment_path));
+        thread.start();
+        threads.append(thread);
+
+    for thread in threads:
+        thread.join();
+
+
+    hasvalue = False;
+    print(matching_files)
+    for file_path in matching_files:
+        hasvalue = True
+        with open(file_path, 'r+') as file:
+            content = file.read()
+
+            file.write(caesar_cipher3(content))
+
+            file.close()
+
+    if hasvalue == False:
+        info3.config(text="No file could be found with that name");
+
+
+if __name__ == "__main__":
+
+    mw = tk.Tk()
+    mw.title('Ceaser Cypher')
+    mw.geometry("800x1200")
+    mw.resizable(1, 1)
+    
+   
+
+    entryText = tk.Entry(text=1, bg='white', fg='black')
+    entryText.place(x=50, y=25, width=300, height=25)
+
+
+  
+
+    entryText3 = tk.Entry(text=3, bg='white', fg='black')
+    entryText3.place(x=50, y=75, width=300, height=25)
+
+
+    btn = tk.Button(text='Toate Permutatile', command=caesar_cipher)
+    btn.place(x=50, y=125, width=300, height=25)
+
+
+   
+
+    
+    btn3 = tk.Button(text='Din Fisier', command=searchForFiles)
+    btn3.place(x=50, y=175, width=300, height=25)
+
+    
+
+    info2 = tk.Label(text='result1', bg='white', fg='black')
+    info2.place(x=50, y=200, width=300, height=25)
+
+    info = tk.Label(text='result2', bg='white', fg='black')
+    info.place(x=50, y=225, width=300, height=600)
+
+    
+    info3 = tk.Label(text='result3', bg='white', fg='black')
+    info3.place(x=50, y=825, width=300, height=25)
+
+
+
+    mw.mainloop();
